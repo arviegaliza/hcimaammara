@@ -132,6 +132,10 @@
                 <input type="text" id="search-bar" placeholder="Search 100+ items (e.g., 'Sofa', 'Blue', 'Milk', 'Fresh')..." onkeyup="renderShop()">
             </div>
             <div class="product-grid" id="product-list"></div>
+
+            <div id="load-more-container" style="text-align:center; margin-top: 30px;" class="hidden">
+                 <button class="btn" style="width: 250px;" onclick="setProductLimit(100); renderShop()">Load All Products</button>
+            </div>
         </div>
 
         <div id="cart-section" class="hidden">
@@ -221,6 +225,7 @@
         let currentUser = JSON.parse(localStorage.getItem('qp_currentUser')) || null;
         let selectedPayment = null;
         let map = null; // Map instance
+        let productDisplayLimit = 50; // New variable to control initial display count
 
         // --- 1. DATA INITIALIZATION ---
         function initData() {
@@ -396,20 +401,27 @@
             return array;
         }
 
+        function setProductLimit(limit) {
+            productDisplayLimit = limit;
+        }
+
         // --- 4. SHOP & CART ---
         function renderShop() {
             const list = document.getElementById('product-list');
             const term = document.getElementById('search-bar').value.toLowerCase();
+            const loadMoreContainer = document.getElementById('load-more-container');
+
             let products = JSON.parse(localStorage.getItem('qp_products'));
             
-            // SHUFFLE PRODUCTS HERE
+            // SHUFFLE PRODUCTS HERE for diverse browsing
             products = shuffleArray(products);
             
             const filtered = products.filter(p => p.name.toLowerCase().includes(term) || p.category.toLowerCase().includes(term));
             
             document.getElementById('product-count-display').innerText = `${filtered.length} Products found`;
             list.innerHTML = '';
-            const limit = term === '' ? 50 : filtered.length;
+            
+            const limit = term === '' ? productDisplayLimit : filtered.length;
             
             filtered.slice(0, limit).forEach(p => {
                 list.innerHTML += `
@@ -423,8 +435,18 @@
                     </div>
                 `;
             });
-            if(term === '' && products.length > 50) {
-                 list.innerHTML += `<div style="grid-column: 1/-1; text-align:center; padding:20px; color:#666;">Use search to find specific items... (Showing top 50 of ${products.length})</div>`;
+            
+            // Display Load More button if search is empty and not all products are shown
+            if (term === '' && filtered.length > productDisplayLimit) {
+                 loadMoreContainer.classList.remove('hidden');
+            } else {
+                 loadMoreContainer.classList.add('hidden');
+            }
+
+            if (term !== '' && filtered.length > 50) {
+                // If a search term is active and there are many results, still show a message
+                 loadMoreContainer.classList.remove('hidden');
+                 loadMoreContainer.innerHTML = `<p style="color:#666;">Showing all ${filtered.length} matching items.</p>`;
             }
         }
 
