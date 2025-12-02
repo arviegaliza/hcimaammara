@@ -250,25 +250,33 @@
             if (!sessionStorage.getItem('qp_cart')) sessionStorage.setItem('qp_cart', JSON.stringify([]));
         }
 
-        // Function to generate a stable, but different, random image URL
-        function getImageUrl(keyword, seed) {
-            const size = 300;
-            // Using reliable source. Using only the core product name as the keyword.
-            return `https://source.unsplash.com/random/${size}x${size}/?${keyword}&sig=${seed}`;
+        // --- FIXED IMAGE PLACEHOLDERS ---
+        const FIXED_IMAGES = {
+            FURNITURE_DEFAULT: "https://via.placeholder.com/300/2C3E50/FFFFFF?text=Furniture+Item", // Dark Blue for Furniture
+            GROCERY_DEFAULT: "https://via.placeholder.com/300/28a745/FFFFFF?text=Grocery+Item", // Green for Groceries
+            MANUAL_DEFAULT: "https://via.placeholder.com/300/FF5722/FFFFFF?text=Custom+Product" // Orange for Manual/Fallback
+        };
+
+        // Function to get the correct category image (No more random generation)
+        function getCategoryImage(category) {
+            if (['Living Room', 'Dining', 'Office', 'Bedroom'].includes(category)) {
+                return FIXED_IMAGES.FURNITURE_DEFAULT;
+            }
+            if (['Dairy', 'Produce', 'Meat', 'Bakery', 'Pantry', 'Beverages', 'Personal Care', 'Snacks'].includes(category)) {
+                return FIXED_IMAGES.GROCERY_DEFAULT;
+            }
+            return FIXED_IMAGES.MANUAL_DEFAULT;
         }
-        
-        // GUARANTEED Fallback Image URL (using picsum as a fallback for Unsplash failures)
-        function getFallbackImageUrl(id) {
-            const size = 300;
-            // Use Math.floor(id / 100) to ensure the fallback image changes roughly every 100 products, keeping variety.
-            const uniqueSeed = Math.floor(id / 100); 
-            return `https://picsum.photos/${size}/${size}?random=${uniqueSeed}`;
+
+        // Fallback is no longer needed in the generation, but kept for manually added items
+        function getFallbackImageUrl() {
+            return FIXED_IMAGES.MANUAL_DEFAULT;
         }
+
 
         function generateProducts(count) {
             let products = [];
             
-            // Generate 50% Furniture and 50% Groceries
             const furnitureCount = Math.ceil(count / 2);
             const groceryCount = count - furnitureCount;
 
@@ -276,12 +284,12 @@
             const f_adjectives = ["Modern", "Vintage", "Minimalist", "Luxury", "Industrial", "Rustic", "Sleek", "Cozy", "Elegant", "Urban", "Classic", "Nordic", "Antique", "Premium", "Chic"];
             const f_materials = ["Leather", "Velvet", "Oak Wood", "Metal", "Glass", "Fabric", "Mahogany", "Pine", "Marble"];
             const f_types = [
-                { name: "Sofa", cat: "Living Room", keyword: "sofa", seed: 1000 },
-                { name: "Armchair", cat: "Living Room", keyword: "armchair", seed: 2000 },
-                { name: "Coffee Table", cat: "Living Room", keyword: "coffee table", seed: 3000 },
-                { name: "Dining Table", cat: "Dining", keyword: "dining table", seed: 4000 },
-                { name: "Office Chair", cat: "Office", keyword: "office chair", seed: 5000 },
-                { name: "King Bed", cat: "Bedroom", keyword: "king bed", seed: 7000 },
+                { name: "Sofa", cat: "Living Room" },
+                { name: "Armchair", cat: "Living Room" },
+                { name: "Coffee Table", cat: "Living Room" },
+                { name: "Dining Table", cat: "Dining" },
+                { name: "Office Chair", cat: "Office" },
+                { name: "King Bed", cat: "Bedroom" },
             ];
 
             for (let i = 0; i < furnitureCount; i++) {
@@ -295,7 +303,7 @@
                     name: `${randomAdj} ${randomMat} ${randomType.name}`,
                     category: randomType.cat,
                     price: price,
-                    image: getImageUrl(randomType.keyword, randomType.seed + i),
+                    image: getCategoryImage(randomType.cat), // FIXED: Use category image
                     description: `A high-quality ${randomAdj.toLowerCase()} piece made from ${randomMat.toLowerCase()} materials. Perfect for modern living spaces.`,
                     sku: `FUR-${i + 100}`,
                     stock: Math.floor(Math.random() * 50) + 5
@@ -305,14 +313,15 @@
             // --- GROCERY DATA ---
             const g_adjectives = ["Fresh", "Organic", "Large", "Small", "Canned", "Frozen", "Aged", "Spicy", "Sweet", "Natural", "Gluten-Free", "Premium"];
             const g_types = [
-                { name: "Milk", cat: "Dairy", keyword: "milk", seed: 11000 },
-                { name: "Bananas", cat: "Produce", keyword: "bananas", seed: 12000 },
-                { name: "Beef Steak", cat: "Meat", keyword: "beef steak", seed: 13000 },
-                { name: "Bread Loaf", cat: "Bakery", keyword: "bread loaf", seed: 14000 },
-                { name: "Cereal Box", cat: "Pantry", keyword: "cereal box", seed: 15000 },
-                { name: "Bottle Water", cat: "Beverages", keyword: "bottle water", seed: 16000 },
-                { name: "Shampoo", cat: "Personal Care", keyword: "shampoo", seed: 17000 },
-                { name: "Eggs", cat: "Dairy", keyword: "eggs", seed: 19000 },
+                { name: "Milk", cat: "Dairy" },
+                { name: "Bananas", cat: "Produce" },
+                { name: "Beef Steak", cat: "Meat" },
+                { name: "Bread Loaf", cat: "Bakery" },
+                { name: "Cereal Box", cat: "Pantry" },
+                { name: "Bottle Water", cat: "Beverages" },
+                { name: "Shampoo", cat: "Personal Care" },
+                { name: "Eggs", cat: "Dairy" },
+                { name: "Cookies", cat: "Snacks" }
             ];
 
             for (let i = 0; i < groceryCount; i++) {
@@ -326,7 +335,7 @@
                     name: `${randomAdj} ${randomType.name}`,
                     category: randomType.cat,
                     price: price,
-                    image: getImageUrl(randomType.keyword, randomType.seed + i),
+                    image: getCategoryImage(randomType.cat), // FIXED: Use category image
                     description: `A ${randomAdj.toLowerCase()} ${randomType.cat.toLowerCase()} item. Guaranteed quality and freshness.`,
                     sku: `GRO-${i + 100}`,
                     stock: Math.floor(Math.random() * 200) + 50
@@ -455,8 +464,8 @@
             const limit = term === '' ? productDisplayLimit : filtered.length;
             
             filtered.slice(0, limit).forEach(p => {
-                // Ensure a valid default image is used if the main image fails to load.
-                const fallbackImage = getFallbackImageUrl(p.id);
+                // FALLBACK IS NO LONGER NECESSARY due to using stable placeholders, but kept as a redundant safety measure.
+                const fallbackImage = getFallbackImageUrl();
 
                 list.innerHTML += `
                     <div class="product-card">
@@ -547,7 +556,7 @@
 
             if (!p) return showToast("Product details not found.");
             
-            const fallbackImage = getFallbackImageUrl(p.id);
+            const fallbackImage = getFallbackImageUrl();
             const modalContent = document.getElementById('details-modal-content');
 
             modalContent.innerHTML = `
@@ -737,7 +746,7 @@
             prodTable.innerHTML = '';
             products.forEach((p, index) => {
                 // Ensure a valid default image is used if the main image fails to load.
-                const fallbackImage = getFallbackImageUrl(p.id);
+                const fallbackImage = getFallbackImageUrl();
                 prodTable.innerHTML += `<tr>
                     <td><img src="${p.image}" class="table-thumb" onerror="this.onerror=null; this.src='${fallbackImage}'"></td>
                     <td style="font-size:0.9rem">${p.name}</td><td>₱${p.price.toLocaleString()}</td><td>${p.category}</td>
@@ -766,8 +775,8 @@
             const n = document.getElementById('new-prod-name').value;
             const p = document.getElementById('new-prod-price').value;
             const c = document.getElementById('new-prod-cat').value;
-            // Use a fallback reliable image if the admin leaves it blank
-            const i = document.getElementById('new-prod-img').value || getFallbackImageUrl(Date.now()); 
+            // If admin leaves image blank, use the manual default placeholder
+            const i = document.getElementById('new-prod-img').value || FIXED_IMAGES.MANUAL_DEFAULT; 
             if(!n || !p) return showToast("Name/Price needed");
             
             const products = JSON.parse(localStorage.getItem('qp_products'));
