@@ -256,6 +256,12 @@
             // Using a reliable source for high-quality, free images.
             return `https://source.unsplash.com/random/${size}x${size}/?${keyword}&sig=${seed}`;
         }
+        
+        // GUARANTEED Fallback Image URL (using picsum as a fallback for Unsplash failures)
+        function getFallbackImageUrl(id) {
+            const size = 300;
+            return `https://picsum.photos/${size}/${size}?random=${id}`;
+        }
 
         function generateProducts(count) {
             let products = [];
@@ -263,27 +269,28 @@
             // --- GROCERY DATA ---
             const g_adjectives = ["Fresh", "Organic", "Large", "Small", "Canned", "Frozen", "Aged", "Spicy", "Sweet", "Natural", "Gluten-Free", "Premium"];
             const g_types = [
-                { name: "Milk", cat: "Dairy", keyword: "milk,carton", seed: 11000 },
-                { name: "Bananas", cat: "Produce", keyword: "bananas,fruit", seed: 12000 },
-                { name: "Beef Steak", cat: "Meat", keyword: "rawmeat,steak", seed: 13000 },
-                { name: "Bread Loaf", cat: "Bakery", keyword: "bread,bakery", seed: 14000 },
-                { name: "Cereal Box", cat: "Pantry", keyword: "cereal,box", seed: 15000 },
-                { name: "Bottle Water", cat: "Beverages", keyword: "bottledwater,drink", seed: 16000 },
-                { name: "Shampoo", cat: "Personal Care", keyword: "shampoo,soap", seed: 17000 },
-                { name: "Dog Food", cat: "Pet Supplies", keyword: "dogfood,pet", seed: 18000 },
-                { name: "Eggs", cat: "Dairy", keyword: "eggs,carton", seed: 19000 },
-                { name: "Tomatoes", cat: "Produce", keyword: "tomatoes,vegetable", seed: 20000 },
-                { name: "Chicken Breast", cat: "Meat", keyword: "chicken,raw", seed: 21000 },
-                { name: "Cookies", cat: "Snacks", keyword: "cookies,packet", seed: 22000 }
+                { name: "Milk", cat: "Dairy", keyword: "dairy,milk carton", seed: 11000 },
+                { name: "Bananas", cat: "Produce", keyword: "fresh fruit,bananas", seed: 12000 },
+                { name: "Beef Steak", cat: "Meat", keyword: "raw steak,meat", seed: 13000 },
+                { name: "Bread Loaf", cat: "Bakery", keyword: "baked bread,bakery", seed: 14000 },
+                { name: "Cereal Box", cat: "Pantry", keyword: "breakfast cereal,box", seed: 15000 },
+                { name: "Bottle Water", cat: "Beverages", keyword: "water bottle,drink", seed: 16000 },
+                { name: "Shampoo", cat: "Personal Care", keyword: "shampoo bottle,personal care", seed: 17000 },
+                { name: "Dog Food", cat: "Pet Supplies", keyword: "bag of dog food", seed: 18000 },
+                { name: "Eggs", cat: "Dairy", keyword: "carton of eggs", seed: 19000 },
+                { name: "Tomatoes", cat: "Produce", keyword: "ripe tomatoes,vegetable", seed: 20000 },
+                { name: "Chicken Breast", cat: "Meat", keyword: "raw chicken breast", seed: 21000 },
+                { name: "Cookies", cat: "Snacks", keyword: "packaged cookies", seed: 22000 }
             ];
 
             for (let i = 0; i < count; i++) {
                 const randomAdj = g_adjectives[Math.floor(Math.random() * g_adjectives.length)];
                 const randomType = g_types[Math.floor(Math.random() * g_types.length)];
                 const price = Math.floor((Math.random() * 500 + 10) / 10) * 10; // Groceries are cheaper
+                const uniqueId = Date.now() + i;
 
                 products.push({
-                    id: Date.now() + i,
+                    id: uniqueId,
                     name: `${randomAdj} ${randomType.name}`,
                     category: randomType.cat,
                     price: price,
@@ -417,9 +424,18 @@
             const limit = term === '' ? productDisplayLimit : filtered.length;
             
             filtered.slice(0, limit).forEach(p => {
+                // Ensure a valid default image is used if the main image fails to load.
+                const fallbackImage = getFallbackImageUrl(p.id);
+
                 list.innerHTML += `
                     <div class="product-card">
-                        <img src="${p.image}" class="product-img" loading="lazy" onclick="openProductDetails(${p.id})">
+                        <img 
+                            src="${p.image}" 
+                            class="product-img" 
+                            loading="lazy" 
+                            onclick="openProductDetails(${p.id})"
+                            onerror="this.onerror=null; this.src='${fallbackImage}'"
+                        >
                         <div class="product-info-click" onclick="openProductDetails(${p.id})">
                             <div class="prod-id">#${p.sku || p.id}</div>
                             <h3>${p.name}</h3>
@@ -499,14 +515,19 @@
             const p = products.find(prod => prod.id === id);
 
             if (!p) return showToast("Product details not found.");
-
+            
+            const fallbackImage = getFallbackImageUrl(p.id);
             const modalContent = document.getElementById('details-modal-content');
 
             modalContent.innerHTML = `
                 <span class="close-modal" onclick="closeProductDetails()">&times;</span>
                 <div class="detail-flex">
                     <div style="flex: 2;">
-                        <img src="${p.image}" class="product-detail-img">
+                        <img 
+                            src="${p.image}" 
+                            class="product-detail-img"
+                            onerror="this.onerror=null; this.src='${fallbackImage}'"
+                        >
                         <p>${p.description}</p>
                     </div>
                     <div style="flex: 1;">
@@ -684,8 +705,10 @@
             const prodTable = document.querySelector('#admin-products-table tbody');
             prodTable.innerHTML = '';
             products.forEach((p, index) => {
+                // Ensure a valid default image is used if the main image fails to load.
+                const fallbackImage = getFallbackImageUrl(p.id);
                 prodTable.innerHTML += `<tr>
-                    <td><img src="${p.image}" class="table-thumb"></td>
+                    <td><img src="${p.image}" class="table-thumb" onerror="this.onerror=null; this.src='${fallbackImage}'"></td>
                     <td style="font-size:0.9rem">${p.name}</td><td>₱${p.price.toLocaleString()}</td><td>${p.category}</td>
                     <td><button onclick="deleteProduct(${index})" class="btn-danger">X</button></td>
                 </tr>`;
@@ -713,7 +736,7 @@
             const p = document.getElementById('new-prod-price').value;
             const c = document.getElementById('new-prod-cat').value;
             // Use a fallback reliable image if the admin leaves it blank
-            const i = document.getElementById('new-prod-img').value || getImageUrl('product,default', Date.now()); 
+            const i = document.getElementById('new-prod-img').value || getFallbackImageUrl(Date.now()); 
             if(!n || !p) return showToast("Name/Price needed");
             
             const products = JSON.parse(localStorage.getItem('qp_products'));
