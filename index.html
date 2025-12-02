@@ -239,6 +239,16 @@
             if (!sessionStorage.getItem('qp_cart')) sessionStorage.setItem('qp_cart', JSON.stringify([]));
         }
 
+        // Function to generate a stable, but different, random image URL
+        // Uses a seed based on the product type + an arbitrary factor for variety.
+        function getImageUrl(keyword, seed) {
+            const size = 300;
+            // Using a reliable source for high-quality, free images.
+            // Using unique seed ensures a variety of images for the same keyword
+            return `https://source.unsplash.com/random/${size}x${size}/?${keyword}&sig=${seed}`;
+        }
+
+
         function generateProducts(count) {
             let products = [];
             const furnitureCount = Math.ceil(count / 2);
@@ -248,16 +258,16 @@
             const f_adjectives = ["Modern", "Vintage", "Minimalist", "Luxury", "Industrial", "Rustic", "Sleek", "Cozy", "Elegant", "Urban", "Classic", "Nordic", "Antique", "Premium", "Chic"];
             const f_materials = ["Leather", "Velvet", "Oak Wood", "Metal", "Glass", "Fabric", "Mahogany", "Pine", "Marble"];
             const f_types = [
-                { name: "Sofa", cat: "Living Room", img: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?fit=crop&w=300&q=80" },
-                { name: "Armchair", cat: "Living Room", img: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?fit=crop&w=300&q=80" },
-                { name: "Coffee Table", cat: "Living Room", img: "https://images.unsplash.com/photo-1533090481720-856c6e3c1fdc?fit=crop&w=300&q=80" },
-                { name: "Dining Table", cat: "Dining", img: "https://images.unsplash.com/photo-1617806118233-18e1de247200?fit=crop&w=300&q=80" },
-                { name: "Office Chair", cat: "Office", img: "https://images.unsplash.com/photo-1505843490538-5133c6c7d0e1?fit=crop&w=300&q=80" },
-                { name: "Office Desk", cat: "Office", img: "https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?fit=crop&w=300&q=80" },
-                { name: "King Bed", cat: "Bedroom", img: "https://images.unsplash.com/photo-1505693416388-b0346efee535?fit=crop&w=300&q=80" },
-                { name: "Bedside Lamp", cat: "Bedroom", img: "https://images.unsplash.com/photo-1513506003011-3b644ab2a80d?fit=crop&w=300&q=80" },
-                { name: "Wall Art", cat: "Decor", img: "https://images.unsplash.com/photo-1580130601254-05fa235e1e13?fit=crop&w=300&q=80" },
-                { name: "Area Rug", cat: "Decor", img: "https://images.unsplash.com/photo-1575414003591-ece8d0416c7a?fit=crop&w=300&q=80" }
+                { name: "Sofa", cat: "Living Room", keyword: "sofa,living", seed: 1000 },
+                { name: "Armchair", cat: "Living Room", keyword: "armchair,furniture", seed: 2000 },
+                { name: "Coffee Table", cat: "Living Room", keyword: "coffeetable,wood", seed: 3000 },
+                { name: "Dining Table", cat: "Dining", keyword: "diningtable,set", seed: 4000 },
+                { name: "Office Chair", cat: "Office", keyword: "officechair,ergonomic", seed: 5000 },
+                { name: "Office Desk", cat: "Office", keyword: "officedesk,workspace", seed: 6000 },
+                { name: "King Bed", cat: "Bedroom", keyword: "bedroom,bedframe", seed: 7000 },
+                { name: "Bedside Lamp", cat: "Bedroom", keyword: "lamp,light", seed: 8000 },
+                { name: "Wall Art", cat: "Decor", keyword: "walldecor,abstract", seed: 9000 },
+                { name: "Area Rug", cat: "Decor", keyword: "arearug,carpet", seed: 10000 }
             ];
 
             for (let i = 0; i < furnitureCount; i++) {
@@ -271,21 +281,21 @@
                     name: `${randomAdj} ${randomMat} ${randomType.name}`,
                     category: randomType.cat,
                     price: price,
-                    image: randomType.img
+                    image: getImageUrl(randomType.keyword, randomType.seed + i)
                 });
             }
 
             // --- GROCERY DATA ---
             const g_adjectives = ["Fresh", "Organic", "Large", "Small", "Canned", "Frozen", "Aged", "Spicy", "Sweet", "Natural", "Gluten-Free", "Premium"];
             const g_types = [
-                { name: "Milk", cat: "Dairy", img: "https://images.unsplash.com/photo-1563636619179-c2159e190809?fit=crop&w=300&q=80" },
-                { name: "Bananas", cat: "Produce", img: "https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?fit=crop&w=300&q=80" },
-                { name: "Beef Steak", cat: "Meat", img: "https://images.unsplash.com/photo-1546944365-c356191b4028?fit=crop&w=300&q=80" },
-                { name: "Bread Loaf", cat: "Bakery", img: "https://images.unsplash.com/photo-1588282322673-c3194a0808c5?fit=crop&w=300&q=80" },
-                { name: "Cereal Box", cat: "Pantry", img: "https://images.unsplash.com/photo-1579306194872-6a7516d0130f?fit=crop&w=300&q=80" },
-                { name: "Bottle Water", cat: "Beverages", img: "https://images.unsplash.com/photo-1546252917-7a5f70a2c070?fit=crop&w=300&q=80" },
-                { name: "Shampoo", cat: "Personal Care", img: "https://images.unsplash.com/photo-1557827829-4d8e040f135b?fit=crop&w=300&q=80" },
-                { name: "Dog Food", cat: "Pet Supplies", img: "https://images.unsplash.com/photo-1598428514101-081077726354?fit=crop&w=300&q=80" }
+                { name: "Milk", cat: "Dairy", keyword: "milk,carton", seed: 11000 },
+                { name: "Bananas", cat: "Produce", keyword: "bananas,fruit", seed: 12000 },
+                { name: "Beef Steak", cat: "Meat", keyword: "rawmeat,steak", seed: 13000 },
+                { name: "Bread Loaf", cat: "Bakery", keyword: "bread,bakery", seed: 14000 },
+                { name: "Cereal Box", cat: "Pantry", keyword: "cereal,box", seed: 15000 },
+                { name: "Bottle Water", cat: "Beverages", keyword: "bottledwater,drink", seed: 16000 },
+                { name: "Shampoo", cat: "Personal Care", keyword: "shampoo,soap", seed: 17000 },
+                { name: "Dog Food", cat: "Pet Supplies", keyword: "dogfood,pet", seed: 18000 }
             ];
 
             for (let i = 0; i < groceryCount; i++) {
@@ -298,7 +308,7 @@
                     name: `${randomAdj} ${randomType.name}`,
                     category: randomType.cat,
                     price: price,
-                    image: randomType.img
+                    image: getImageUrl(randomType.keyword, randomType.seed + i)
                 });
             }
 
@@ -339,7 +349,7 @@
             } else {
                 const cart = JSON.parse(sessionStorage.getItem('qp_cart') || '[]');
                 nav.innerHTML = `
-                    <button onclick="showSection('shop'); renderShop()">Shop</button>
+                    <button onclick="showSection('shop'); setProductLimit(50); renderShop()">Shop</button>
                     <button onclick="showSection('cart'); renderCart()">Cart <span class="cart-badge">${cart.length}</span></button>
                     <button onclick="showSection('tracking'); renderTracking()">My Orders</button>
                     <button onclick="logout()">Logout</button>
@@ -439,11 +449,12 @@
             // Display Load More button if search is empty and not all products are shown
             if (term === '' && filtered.length > productDisplayLimit) {
                  loadMoreContainer.classList.remove('hidden');
+                 loadMoreContainer.innerHTML = `<button class="btn" style="width: 250px;" onclick="setProductLimit(${filtered.length}); renderShop()">Load All ${filtered.length} Products</button>`;
             } else {
                  loadMoreContainer.classList.add('hidden');
             }
 
-            if (term !== '' && filtered.length > 50) {
+            if (term !== '' && filtered.length > 0) {
                 // If a search term is active and there are many results, still show a message
                  loadMoreContainer.classList.remove('hidden');
                  loadMoreContainer.innerHTML = `<p style="color:#666;">Showing all ${filtered.length} matching items.</p>`;
@@ -679,7 +690,8 @@
             const n = document.getElementById('new-prod-name').value;
             const p = document.getElementById('new-prod-price').value;
             const c = document.getElementById('new-prod-cat').value;
-            const i = document.getElementById('new-prod-img').value || "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=300";
+            // Use a fallback reliable image if the admin leaves it blank
+            const i = document.getElementById('new-prod-img').value || getImageUrl('product,default', Date.now()); 
             if(!n || !p) return showToast("Name/Price needed");
             
             const products = JSON.parse(localStorage.getItem('qp_products'));
