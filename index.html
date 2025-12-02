@@ -244,8 +244,8 @@
                 const users = [{ username: 'admin', password: '123', role: 'admin' }, { username: 'user', password: '123', role: 'customer' }];
                 localStorage.setItem('qp_users', JSON.stringify(users));
             }
-            // Generate 100 Mixed products if not set
-            if (!localStorage.getItem('qp_products')) generateProducts(100); 
+            // CRITICAL FIX: Force generation of 100 Mixed products every time, to ensure consistency and fresh data.
+            generateProducts(100); 
             if (!localStorage.getItem('qp_orders')) localStorage.setItem('qp_orders', JSON.stringify([]));
             if (!sessionStorage.getItem('qp_cart')) sessionStorage.setItem('qp_cart', JSON.stringify([]));
         }
@@ -257,7 +257,7 @@
             MANUAL_DEFAULT: "https://via.placeholder.com/300/FF5722/FFFFFF?text=Custom+Product" // Orange for Manual/Fallback
         };
 
-        // Function to get the correct category image (No more random generation)
+        // Function to get the correct category image
         function getCategoryImage(category) {
             if (['Living Room', 'Dining', 'Office', 'Bedroom'].includes(category)) {
                 return FIXED_IMAGES.FURNITURE_DEFAULT;
@@ -268,7 +268,6 @@
             return FIXED_IMAGES.MANUAL_DEFAULT;
         }
 
-        // Fallback is no longer needed in the generation, but kept for manually added items
         function getFallbackImageUrl() {
             return FIXED_IMAGES.MANUAL_DEFAULT;
         }
@@ -303,7 +302,7 @@
                     name: `${randomAdj} ${randomMat} ${randomType.name}`,
                     category: randomType.cat,
                     price: price,
-                    image: getCategoryImage(randomType.cat), // FIXED: Use category image
+                    image: getCategoryImage(randomType.cat), 
                     description: `A high-quality ${randomAdj.toLowerCase()} piece made from ${randomMat.toLowerCase()} materials. Perfect for modern living spaces.`,
                     sku: `FUR-${i + 100}`,
                     stock: Math.floor(Math.random() * 50) + 5
@@ -335,7 +334,7 @@
                     name: `${randomAdj} ${randomType.name}`,
                     category: randomType.cat,
                     price: price,
-                    image: getCategoryImage(randomType.cat), // FIXED: Use category image
+                    image: getCategoryImage(randomType.cat), 
                     description: `A ${randomAdj.toLowerCase()} ${randomType.cat.toLowerCase()} item. Guaranteed quality and freshness.`,
                     sku: `GRO-${i + 100}`,
                     stock: Math.floor(Math.random() * 200) + 50
@@ -464,7 +463,6 @@
             const limit = term === '' ? productDisplayLimit : filtered.length;
             
             filtered.slice(0, limit).forEach(p => {
-                // FALLBACK IS NO LONGER NECESSARY due to using stable placeholders, but kept as a redundant safety measure.
                 const fallbackImage = getFallbackImageUrl();
 
                 list.innerHTML += `
@@ -745,7 +743,6 @@
             const prodTable = document.querySelector('#admin-products-table tbody');
             prodTable.innerHTML = '';
             products.forEach((p, index) => {
-                // Ensure a valid default image is used if the main image fails to load.
                 const fallbackImage = getFallbackImageUrl();
                 prodTable.innerHTML += `<tr>
                     <td><img src="${p.image}" class="table-thumb" onerror="this.onerror=null; this.src='${fallbackImage}'"></td>
