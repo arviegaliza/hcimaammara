@@ -125,11 +125,11 @@
 
         <div id="shop-section" class="hidden">
             <div style="display:flex; justify-content:space-between; align-items:center;">
-                <h2>Shop Furniture</h2>
+                <h2>Shop Products</h2>
                 <small style="color:#666" id="product-count-display">0 Products found</small>
             </div>
             <div class="form-group" style="max-width: 400px; margin-top: 10px;">
-                <input type="text" id="search-bar" placeholder="Search 100+ items (e.g., 'Sofa', 'Blue', 'Modern')..." onkeyup="renderShop()">
+                <input type="text" id="search-bar" placeholder="Search 100+ items (e.g., 'Sofa', 'Blue', 'Milk', 'Fresh')..." onkeyup="renderShop()">
             </div>
             <div class="product-grid" id="product-list"></div>
         </div>
@@ -228,15 +228,21 @@
                 const users = [{ username: 'admin', password: '123', role: 'admin' }, { username: 'user', password: '123', role: 'customer' }];
                 localStorage.setItem('qp_users', JSON.stringify(users));
             }
-            if (!localStorage.getItem('qp_products')) generateProducts(12);
+            // Generate 100 products (Furniture and Groceries) if not set
+            if (!localStorage.getItem('qp_products')) generateProducts(100); 
             if (!localStorage.getItem('qp_orders')) localStorage.setItem('qp_orders', JSON.stringify([]));
             if (!sessionStorage.getItem('qp_cart')) sessionStorage.setItem('qp_cart', JSON.stringify([]));
         }
 
         function generateProducts(count) {
-            const adjectives = ["Modern", "Vintage", "Minimalist", "Luxury", "Industrial", "Rustic", "Sleek", "Cozy", "Elegant", "Urban", "Classic", "Nordic", "Antique", "Premium", "Chic"];
-            const materials = ["Leather", "Velvet", "Oak Wood", "Metal", "Glass", "Fabric", "Mahogany", "Pine", "Marble"];
-            const types = [
+            let products = [];
+            const furnitureCount = Math.ceil(count / 2);
+            const groceryCount = count - furnitureCount;
+
+            // --- FURNITURE DATA ---
+            const f_adjectives = ["Modern", "Vintage", "Minimalist", "Luxury", "Industrial", "Rustic", "Sleek", "Cozy", "Elegant", "Urban", "Classic", "Nordic", "Antique", "Premium", "Chic"];
+            const f_materials = ["Leather", "Velvet", "Oak Wood", "Metal", "Glass", "Fabric", "Mahogany", "Pine", "Marble"];
+            const f_types = [
                 { name: "Sofa", cat: "Living Room", img: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?fit=crop&w=300&q=80" },
                 { name: "Armchair", cat: "Living Room", img: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?fit=crop&w=300&q=80" },
                 { name: "Coffee Table", cat: "Living Room", img: "https://images.unsplash.com/photo-1533090481720-856c6e3c1fdc?fit=crop&w=300&q=80" },
@@ -249,11 +255,10 @@
                 { name: "Area Rug", cat: "Decor", img: "https://images.unsplash.com/photo-1575414003591-ece8d0416c7a?fit=crop&w=300&q=80" }
             ];
 
-            let products = [];
-            for (let i = 0; i < count; i++) {
-                const randomAdj = adjectives[Math.floor(Math.random() * adjectives.length)];
-                const randomMat = materials[Math.floor(Math.random() * materials.length)];
-                const randomType = types[Math.floor(Math.random() * types.length)];
+            for (let i = 0; i < furnitureCount; i++) {
+                const randomAdj = f_adjectives[Math.floor(Math.random() * f_adjectives.length)];
+                const randomMat = f_materials[Math.floor(Math.random() * f_materials.length)];
+                const randomType = f_types[Math.floor(Math.random() * f_types.length)];
                 const price = Math.floor((Math.random() * 49000 + 1000) / 100) * 100;
 
                 products.push({
@@ -264,11 +269,39 @@
                     image: randomType.img
                 });
             }
+
+            // --- GROCERY DATA ---
+            const g_adjectives = ["Fresh", "Organic", "Large", "Small", "Canned", "Frozen", "Aged", "Spicy", "Sweet", "Natural", "Gluten-Free", "Premium"];
+            const g_types = [
+                { name: "Milk", cat: "Dairy", img: "https://images.unsplash.com/photo-1563636619179-c2159e190809?fit=crop&w=300&q=80" },
+                { name: "Bananas", cat: "Produce", img: "https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?fit=crop&w=300&q=80" },
+                { name: "Beef Steak", cat: "Meat", img: "https://images.unsplash.com/photo-1546944365-c356191b4028?fit=crop&w=300&q=80" },
+                { name: "Bread Loaf", cat: "Bakery", img: "https://images.unsplash.com/photo-1588282322673-c3194a0808c5?fit=crop&w=300&q=80" },
+                { name: "Cereal Box", cat: "Pantry", img: "https://images.unsplash.com/photo-1579306194872-6a7516d0130f?fit=crop&w=300&q=80" },
+                { name: "Bottle Water", cat: "Beverages", img: "https://images.unsplash.com/photo-1546252917-7a5f70a2c070?fit=crop&w=300&q=80" },
+                { name: "Shampoo", cat: "Personal Care", img: "https://images.unsplash.com/photo-1557827829-4d8e040f135b?fit=crop&w=300&q=80" },
+                { name: "Dog Food", cat: "Pet Supplies", img: "https://images.unsplash.com/photo-1598428514101-081077726354?fit=crop&w=300&q=80" }
+            ];
+
+            for (let i = 0; i < groceryCount; i++) {
+                const randomAdj = g_adjectives[Math.floor(Math.random() * g_adjectives.length)];
+                const randomType = g_types[Math.floor(Math.random() * g_types.length)];
+                const price = Math.floor((Math.random() * 500 + 10) / 10) * 10; // Groceries are cheaper
+
+                products.push({
+                    id: Date.now() + furnitureCount + i,
+                    name: `${randomAdj} ${randomType.name}`,
+                    category: randomType.cat,
+                    price: price,
+                    image: randomType.img
+                });
+            }
+
             localStorage.setItem('qp_products', JSON.stringify(products));
         }
 
         function resetDataAndGenerate100() {
-            if(confirm("Generate 100 new products? This replaces current inventory.")) {
+            if(confirm("Generate 100 new products (Furniture/Grocery)? This replaces current inventory.")) {
                 generateProducts(100);
                 location.reload();
             }
@@ -479,7 +512,7 @@
                     <td>${o.id}</td>
                     <td>${o.date}</td>
                     <td>₱${o.total.toLocaleString()}</td>
-                    <td class="status-${o.status.toLowerCase()}">${o.status}</td>
+                    <td class="status-${o.status.toLowerCase().replace(' ', '-')}" style="font-weight:bold;">${o.status}</td>
                     <td><button class="btn-info" onclick="openMap('${o.id}', '${o.status}')">Track Map</button></td>
                 </tr>`;
             });
@@ -504,11 +537,22 @@
                 ];
 
                 // Simulate Courier Location (Midpoint)
-                const courier = [
-                    (start[0] + end[0]) / 2,
-                    (start[1] + end[1]) / 2
-                ];
-
+                let courier;
+                if(status === 'Pending') {
+                    // Courier is at the start (Warehouse)
+                    courier = start;
+                } else if(status === 'Shipped') {
+                    // Courier is between start and end
+                    const ratio = Math.random() * 0.5 + 0.25; // Randomly between 25% and 75% way
+                    courier = [
+                        start[0] + (end[0] - start[0]) * ratio,
+                        start[1] + (end[1] - start[1]) * ratio
+                    ];
+                } else {
+                     // Courier is at the end (Delivered or close)
+                    courier = end;
+                }
+                
                 map = L.map('map').setView(courier, 13);
 
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -528,12 +572,13 @@
                 L.marker(start, {icon: createIcon('red')}).addTo(map).bindPopup("<b>Warehouse</b><br>Order Dispatched").openPopup();
                 L.marker(end, {icon: createIcon('green')}).addTo(map).bindPopup("<b>Your Address</b><br>Destination");
                 
-                if (status !== 'Delivered') {
-                    L.marker(courier, {icon: createIcon('blue')}).addTo(map).bindPopup("<b>Courier Truck</b><br>On the way!");
+                if (status === 'Shipped' || status === 'Pending') {
+                    L.marker(courier, {icon: createIcon('blue')}).addTo(map).bindPopup("<b>Courier Truck</b><br>"+(status==='Pending'?'Preparing to ship!':'On the way!')).openPopup();
                     
-                    // Draw Line
-                    L.polyline([start, courier, end], {color: 'blue', weight: 4, opacity: 0.7, dashArray: '10, 10'}).addTo(map);
-                } else {
+                    // Draw Line: Red for start to courier, Blue for courier to end
+                    L.polyline([start, courier], {color: 'red', weight: 4, opacity: 0.7}).addTo(map);
+                    L.polyline([courier, end], {color: 'blue', weight: 4, opacity: 0.7, dashArray: '10, 10'}).addTo(map);
+                } else if (status === 'Delivered') {
                     L.polyline([start, end], {color: 'green', weight: 4}).addTo(map);
                     document.getElementById('map-status-text').innerText += " (Arrived)";
                 }
@@ -583,10 +628,12 @@
             const orders = JSON.parse(localStorage.getItem('qp_orders'));
             orders[i].status = s;
             localStorage.setItem('qp_orders', JSON.stringify(orders));
+            renderAdminDashboard();
             showToast("Status Updated");
         }
 
         function deleteOrder(i) {
+            if(!confirm("Delete Order?")) return;
             const orders = JSON.parse(localStorage.getItem('qp_orders'));
             orders.splice(i, 1);
             localStorage.setItem('qp_orders', JSON.stringify(orders));
