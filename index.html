@@ -386,12 +386,25 @@
             showSection('auth');
             showToast("Logged out");
         }
+        
+        // --- Utility function for shuffling array (Fisher-Yates) ---
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
 
         // --- 4. SHOP & CART ---
         function renderShop() {
             const list = document.getElementById('product-list');
             const term = document.getElementById('search-bar').value.toLowerCase();
-            const products = JSON.parse(localStorage.getItem('qp_products'));
+            let products = JSON.parse(localStorage.getItem('qp_products'));
+            
+            // SHUFFLE PRODUCTS HERE
+            products = shuffleArray(products);
+            
             const filtered = products.filter(p => p.name.toLowerCase().includes(term) || p.category.toLowerCase().includes(term));
             
             document.getElementById('product-count-display').innerText = `${filtered.length} Products found`;
