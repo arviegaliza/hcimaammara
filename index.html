@@ -136,11 +136,11 @@
 
         <div id="shop-section" class="hidden">
             <div style="display:flex; justify-content:space-between; align-items:center;">
-                <h2>Shop Grocery Products</h2>
+                <h2>Shop Products</h2>
                 <small style="color:#666" id="product-count-display">0 Products found</small>
             </div>
             <div class="form-group" style="max-width: 400px; margin-top: 10px;">
-                <input type="text" id="search-bar" placeholder="Search 100+ items (e.g., 'Milk', 'Fresh', 'Meat')..." onkeyup="renderShop()">
+                <input type="text" id="search-bar" placeholder="Search 100+ items (e.g., 'Sofa', 'Milk', 'Fresh')..." onkeyup="renderShop()">
             </div>
             <div class="product-grid" id="product-list"></div>
 
@@ -236,7 +236,7 @@
         let currentUser = JSON.parse(localStorage.getItem('qp_currentUser')) || null;
         let selectedPayment = null;
         let map = null; // Map instance
-        let productDisplayLimit = 12; // Adjusted: Only show 12 products initially
+        let productDisplayLimit = 12; // Initial display count
 
         // --- 1. DATA INITIALIZATION ---
         function initData() {
@@ -244,7 +244,7 @@
                 const users = [{ username: 'admin', password: '123', role: 'admin' }, { username: 'user', password: '123', role: 'customer' }];
                 localStorage.setItem('qp_users', JSON.stringify(users));
             }
-            // Generate 100 Grocery products if not set
+            // Generate 100 Mixed products if not set
             if (!localStorage.getItem('qp_products')) generateProducts(100); 
             if (!localStorage.getItem('qp_orders')) localStorage.setItem('qp_orders', JSON.stringify([]));
             if (!sessionStorage.getItem('qp_cart')) sessionStorage.setItem('qp_cart', JSON.stringify([]));
@@ -253,7 +253,6 @@
         // Function to generate a stable, but different, random image URL
         function getImageUrl(keyword, seed) {
             const size = 300;
-            // Using a reliable source for high-quality, free images.
             return `https://source.unsplash.com/random/${size}x${size}/?${keyword}&sig=${seed}`;
         }
         
@@ -266,6 +265,40 @@
         function generateProducts(count) {
             let products = [];
             
+            // Generate 50% Furniture and 50% Groceries
+            const furnitureCount = Math.ceil(count / 2);
+            const groceryCount = count - furnitureCount;
+
+            // --- FURNITURE DATA (Re-added) ---
+            const f_adjectives = ["Modern", "Vintage", "Minimalist", "Luxury", "Industrial", "Rustic", "Sleek", "Cozy", "Elegant", "Urban", "Classic", "Nordic", "Antique", "Premium", "Chic"];
+            const f_materials = ["Leather", "Velvet", "Oak Wood", "Metal", "Glass", "Fabric", "Mahogany", "Pine", "Marble"];
+            const f_types = [
+                { name: "Sofa", cat: "Living Room", keyword: "furniture,sofa,living", seed: 1000 },
+                { name: "Armchair", cat: "Living Room", keyword: "armchair,furniture", seed: 2000 },
+                { name: "Coffee Table", cat: "Living Room", keyword: "coffeetable,wood,furniture", seed: 3000 },
+                { name: "Dining Table", cat: "Dining", keyword: "diningtable,set,furniture", seed: 4000 },
+                { name: "Office Chair", cat: "Office", keyword: "officechair,ergonomic,furniture", seed: 5000 },
+                { name: "King Bed", cat: "Bedroom", keyword: "bedroom,bedframe,furniture", seed: 7000 },
+            ];
+
+            for (let i = 0; i < furnitureCount; i++) {
+                const randomAdj = f_adjectives[Math.floor(Math.random() * f_adjectives.length)];
+                const randomMat = f_materials[Math.floor(Math.random() * f_materials.length)];
+                const randomType = f_types[Math.floor(Math.random() * f_types.length)];
+                const price = Math.floor((Math.random() * 49000 + 1000) / 100) * 100;
+
+                products.push({
+                    id: Date.now() + i,
+                    name: `${randomAdj} ${randomMat} ${randomType.name}`,
+                    category: randomType.cat,
+                    price: price,
+                    image: getImageUrl(randomType.keyword, randomType.seed + i),
+                    description: `A high-quality ${randomAdj.toLowerCase()} piece made from ${randomMat.toLowerCase()} materials. Perfect for modern living spaces.`,
+                    sku: `FUR-${i + 100}`,
+                    stock: Math.floor(Math.random() * 50) + 5
+                });
+            }
+
             // --- GROCERY DATA ---
             const g_adjectives = ["Fresh", "Organic", "Large", "Small", "Canned", "Frozen", "Aged", "Spicy", "Sweet", "Natural", "Gluten-Free", "Premium"];
             const g_types = [
@@ -276,18 +309,14 @@
                 { name: "Cereal Box", cat: "Pantry", keyword: "breakfast cereal,box", seed: 15000 },
                 { name: "Bottle Water", cat: "Beverages", keyword: "water bottle,drink", seed: 16000 },
                 { name: "Shampoo", cat: "Personal Care", keyword: "shampoo bottle,personal care", seed: 17000 },
-                { name: "Dog Food", cat: "Pet Supplies", keyword: "bag of dog food", seed: 18000 },
                 { name: "Eggs", cat: "Dairy", keyword: "carton of eggs", seed: 19000 },
-                { name: "Tomatoes", cat: "Produce", keyword: "ripe tomatoes,vegetable", seed: 20000 },
-                { name: "Chicken Breast", cat: "Meat", keyword: "raw chicken breast", seed: 21000 },
-                { name: "Cookies", cat: "Snacks", keyword: "packaged cookies", seed: 22000 }
             ];
 
-            for (let i = 0; i < count; i++) {
+            for (let i = 0; i < groceryCount; i++) {
                 const randomAdj = g_adjectives[Math.floor(Math.random() * g_adjectives.length)];
                 const randomType = g_types[Math.floor(Math.random() * g_types.length)];
                 const price = Math.floor((Math.random() * 500 + 10) / 10) * 10; // Groceries are cheaper
-                const uniqueId = Date.now() + i;
+                const uniqueId = Date.now() + furnitureCount + i;
 
                 products.push({
                     id: uniqueId,
@@ -305,8 +334,7 @@
         }
 
         function resetDataAndGenerate100() {
-            if(confirm("Generate 100 new GROCERY products? This replaces current inventory.")) {
-                // Ensure we only generate groceries
+            if(confirm("Generate 100 new MIXED products (Furniture/Grocery)? This replaces current inventory.")) {
                 generateProducts(100); 
                 location.reload();
             }
