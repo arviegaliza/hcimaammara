@@ -140,7 +140,7 @@
                 <small style="color:#666" id="product-count-display">0 Products found</small>
             </div>
             <div class="form-group" style="max-width: 400px; margin-top: 10px;">
-                <input type="text" id="search-bar" placeholder="Search 100+ items (e.g., 'Sofa', 'Milk', 'Fresh')..." onkeyup="renderShop()">
+                <input type="text" id="search-bar" placeholder="Search 100+ items (e.g., 'Canned', 'Snack', 'Shampoo')..." onkeyup="renderShop()">
             </div>
             <div class="product-grid" id="product-list"></div>
 
@@ -250,92 +250,75 @@
             if (!sessionStorage.getItem('qp_cart')) sessionStorage.setItem('qp_cart', JSON.stringify([]));
         }
 
-        // --- FIXED IMAGE PLACEHOLDERS ---
-        const FIXED_IMAGES = {
-            FURNITURE_DEFAULT: "https://via.placeholder.com/300/2C3E50/FFFFFF?text=Furniture+Item", // Dark Blue for Furniture
-            GROCERY_DEFAULT: "https://via.placeholder.com/300/28a745/FFFFFF?text=Grocery+Item", // Green for Groceries
-            MANUAL_DEFAULT: "https://via.placeholder.com/300/FF5722/FFFFFF?text=Custom+Product" // Orange for Manual/Fallback
+        // --- LOCAL ASSET MAPPING ---
+        const ASSET_MAPPING = {
+            CANNED: 'assets/can.png',
+            CANNED_FOOD: 'assets/canfoods.png',
+            CANNED_EXTRA: 'assets/canned-food.png',
+            DRINK: 'assets/gin.png',
+            SNACKS_GENERIC: 'assets/nacks.png',
+            SHAMPOO: 'assets/shampoo.png',
+            SNACK_SINGLE: 'assets/snack.png',
+            SNACKS_PLURAL: 'assets/snacks.png',
+            TOOTHBRUSH: 'assets/toothbrush.png',
+            TOOTHPASTE: 'assets/toothpaste.png',
+            MANUAL_DEFAULT: "https://via.placeholder.com/300/FF5722/FFFFFF?text=Custom+Product"
         };
 
         // Function to get the correct category image
         function getCategoryImage(category) {
-            if (['Living Room', 'Dining', 'Office', 'Bedroom'].includes(category)) {
-                return FIXED_IMAGES.FURNITURE_DEFAULT;
+            switch (category) {
+                case 'Canned Goods':
+                    return ASSET_MAPPING.CANNED;
+                case 'Snacks':
+                    return ASSET_MAPPING.SNACKS_GENERIC;
+                case 'Beverages':
+                    return ASSET_MAPPING.DRINK;
+                case 'Personal Care':
+                    return ASSET_MAPPING.SHAMPOO;
+                default:
+                    // Use a generic canned food image as a reliable fallback for other groceries
+                    return ASSET_MAPPING.CANNED_FOOD; 
             }
-            if (['Dairy', 'Produce', 'Meat', 'Bakery', 'Pantry', 'Beverages', 'Personal Care', 'Snacks'].includes(category)) {
-                return FIXED_IMAGES.GROCERY_DEFAULT;
-            }
-            return FIXED_IMAGES.MANUAL_DEFAULT;
         }
 
         function getFallbackImageUrl() {
-            return FIXED_IMAGES.MANUAL_DEFAULT;
+            return ASSET_MAPPING.MANUAL_DEFAULT;
         }
 
 
         function generateProducts(count) {
             let products = [];
             
-            const furnitureCount = Math.ceil(count / 2);
-            const groceryCount = count - furnitureCount;
-
-            // --- FURNITURE DATA ---
-            const f_adjectives = ["Modern", "Vintage", "Minimalist", "Luxury", "Industrial", "Rustic", "Sleek", "Cozy", "Elegant", "Urban", "Classic", "Nordic", "Antique", "Premium", "Chic"];
-            const f_materials = ["Leather", "Velvet", "Oak Wood", "Metal", "Glass", "Fabric", "Mahogany", "Pine", "Marble"];
-            const f_types = [
-                { name: "Sofa", cat: "Living Room" },
-                { name: "Armchair", cat: "Living Room" },
-                { name: "Coffee Table", cat: "Living Room" },
-                { name: "Dining Table", cat: "Dining" },
-                { name: "Office Chair", cat: "Office" },
-                { name: "King Bed", cat: "Bedroom" },
-            ];
-
-            for (let i = 0; i < furnitureCount; i++) {
-                const randomAdj = f_adjectives[Math.floor(Math.random() * f_adjectives.length)];
-                const randomMat = f_materials[Math.floor(Math.random() * f_materials.length)];
-                const randomType = f_types[Math.floor(Math.random() * f_types.length)];
-                const price = Math.floor((Math.random() * 49000 + 1000) / 100) * 100;
-
-                products.push({
-                    id: Date.now() + i,
-                    name: `${randomAdj} ${randomMat} ${randomType.name}`,
-                    category: randomType.cat,
-                    price: price,
-                    image: getCategoryImage(randomType.cat), 
-                    description: `A high-quality ${randomAdj.toLowerCase()} piece made from ${randomMat.toLowerCase()} materials. Perfect for modern living spaces.`,
-                    sku: `FUR-${i + 100}`,
-                    stock: Math.floor(Math.random() * 50) + 5
-                });
-            }
-
-            // --- GROCERY DATA ---
-            const g_adjectives = ["Fresh", "Organic", "Large", "Small", "Canned", "Frozen", "Aged", "Spicy", "Sweet", "Natural", "Gluten-Free", "Premium"];
+            // Focus entirely on Grocery/Personal Care types mapped to assets
+            const g_adjectives = ["Large", "Small", "Canned", "Family Pack", "Frozen", "Spicy", "Sweet", "Natural", "Premium", "Extra Large", "Compact"];
             const g_types = [
-                { name: "Milk", cat: "Dairy" },
-                { name: "Bananas", cat: "Produce" },
-                { name: "Beef Steak", cat: "Meat" },
-                { name: "Bread Loaf", cat: "Bakery" },
-                { name: "Cereal Box", cat: "Pantry" },
-                { name: "Bottle Water", cat: "Beverages" },
-                { name: "Shampoo", cat: "Personal Care" },
-                { name: "Eggs", cat: "Dairy" },
-                { name: "Cookies", cat: "Snacks" }
+                { name: "Soda Can", cat: "Beverages", image: ASSET_MAPPING.DRINK },
+                { name: "Canned Tuna", cat: "Canned Goods", image: ASSET_MAPPING.CANNED_FOOD },
+                { name: "Canned Meat", cat: "Canned Goods", image: ASSET_MAPPING.CANNED_EXTRA },
+                { name: "Tortilla Chips", cat: "Snacks", image: ASSET_MAPPING.SNACKS_PLURAL },
+                { name: "Shampoo Bottle", cat: "Personal Care", image: ASSET_MAPPING.SHAMPOO },
+                { name: "Candy Bar", cat: "Snacks", image: ASSET_MAPPING.SNACK_SINGLE },
+                { name: "Pack of Crackers", cat: "Snacks", image: ASSET_MAPPING.SNACKS_GENERIC },
+                { name: "Toothbrush", cat: "Personal Care", image: ASSET_MAPPING.TOOTHBRUSH },
+                { name: "Toothpaste Tube", cat: "Personal Care", image: ASSET_MAPPING.TOOTHPASTE },
+                { name: "Beans in Can", cat: "Canned Goods", image: ASSET_MAPPING.CANNED },
             ];
 
-            for (let i = 0; i < groceryCount; i++) {
+            // Generate 'count' (100) items based on the provided assets
+            for (let i = 0; i < count; i++) {
                 const randomAdj = g_adjectives[Math.floor(Math.random() * g_adjectives.length)];
                 const randomType = g_types[Math.floor(Math.random() * g_types.length)];
-                const price = Math.floor((Math.random() * 500 + 10) / 10) * 10; // Groceries are cheaper
-                const uniqueId = Date.now() + furnitureCount + i;
+                const price = Math.floor((Math.random() * 500 + 10) / 10) * 10; 
+                const uniqueId = Date.now() + i;
 
                 products.push({
                     id: uniqueId,
                     name: `${randomAdj} ${randomType.name}`,
                     category: randomType.cat,
                     price: price,
-                    image: getCategoryImage(randomType.cat), 
-                    description: `A ${randomAdj.toLowerCase()} ${randomType.cat.toLowerCase()} item. Guaranteed quality and freshness.`,
+                    image: randomType.image, // Use the specific asset image
+                    description: `A ${randomAdj.toLowerCase()} ${randomType.cat.toLowerCase()} item. Guaranteed quality.`,
                     sku: `GRO-${i + 100}`,
                     stock: Math.floor(Math.random() * 200) + 50
                 });
@@ -345,7 +328,7 @@
         }
 
         function resetDataAndGenerate100() {
-            if(confirm("Generate 100 new MIXED products (Furniture/Grocery)? This replaces current inventory.")) {
+            if(confirm("Generate 100 new asset-based products? This replaces current inventory.")) {
                 generateProducts(100); 
                 location.reload();
             }
