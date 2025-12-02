@@ -253,13 +253,16 @@
         // Function to generate a stable, but different, random image URL
         function getImageUrl(keyword, seed) {
             const size = 300;
+            // Using reliable source. Using only the core product name as the keyword.
             return `https://source.unsplash.com/random/${size}x${size}/?${keyword}&sig=${seed}`;
         }
         
         // GUARANTEED Fallback Image URL (using picsum as a fallback for Unsplash failures)
         function getFallbackImageUrl(id) {
             const size = 300;
-            return `https://picsum.photos/${size}/${size}?random=${id}`;
+            // Use Math.floor(id / 100) to ensure the fallback image changes roughly every 100 products, keeping variety.
+            const uniqueSeed = Math.floor(id / 100); 
+            return `https://picsum.photos/${size}/${size}?random=${uniqueSeed}`;
         }
 
         function generateProducts(count) {
@@ -269,16 +272,16 @@
             const furnitureCount = Math.ceil(count / 2);
             const groceryCount = count - furnitureCount;
 
-            // --- FURNITURE DATA (Re-added) ---
+            // --- FURNITURE DATA ---
             const f_adjectives = ["Modern", "Vintage", "Minimalist", "Luxury", "Industrial", "Rustic", "Sleek", "Cozy", "Elegant", "Urban", "Classic", "Nordic", "Antique", "Premium", "Chic"];
             const f_materials = ["Leather", "Velvet", "Oak Wood", "Metal", "Glass", "Fabric", "Mahogany", "Pine", "Marble"];
             const f_types = [
-                { name: "Sofa", cat: "Living Room", keyword: "furniture,sofa,living", seed: 1000 },
-                { name: "Armchair", cat: "Living Room", keyword: "armchair,furniture", seed: 2000 },
-                { name: "Coffee Table", cat: "Living Room", keyword: "coffeetable,wood,furniture", seed: 3000 },
-                { name: "Dining Table", cat: "Dining", keyword: "diningtable,set,furniture", seed: 4000 },
-                { name: "Office Chair", cat: "Office", keyword: "officechair,ergonomic,furniture", seed: 5000 },
-                { name: "King Bed", cat: "Bedroom", keyword: "bedroom,bedframe,furniture", seed: 7000 },
+                { name: "Sofa", cat: "Living Room", keyword: "sofa", seed: 1000 },
+                { name: "Armchair", cat: "Living Room", keyword: "armchair", seed: 2000 },
+                { name: "Coffee Table", cat: "Living Room", keyword: "coffee table", seed: 3000 },
+                { name: "Dining Table", cat: "Dining", keyword: "dining table", seed: 4000 },
+                { name: "Office Chair", cat: "Office", keyword: "office chair", seed: 5000 },
+                { name: "King Bed", cat: "Bedroom", keyword: "king bed", seed: 7000 },
             ];
 
             for (let i = 0; i < furnitureCount; i++) {
@@ -302,14 +305,14 @@
             // --- GROCERY DATA ---
             const g_adjectives = ["Fresh", "Organic", "Large", "Small", "Canned", "Frozen", "Aged", "Spicy", "Sweet", "Natural", "Gluten-Free", "Premium"];
             const g_types = [
-                { name: "Milk", cat: "Dairy", keyword: "dairy,milk carton", seed: 11000 },
-                { name: "Bananas", cat: "Produce", keyword: "fresh fruit,bananas", seed: 12000 },
-                { name: "Beef Steak", cat: "Meat", keyword: "raw steak,meat", seed: 13000 },
-                { name: "Bread Loaf", cat: "Bakery", keyword: "baked bread,bakery", seed: 14000 },
-                { name: "Cereal Box", cat: "Pantry", keyword: "breakfast cereal,box", seed: 15000 },
-                { name: "Bottle Water", cat: "Beverages", keyword: "water bottle,drink", seed: 16000 },
-                { name: "Shampoo", cat: "Personal Care", keyword: "shampoo bottle,personal care", seed: 17000 },
-                { name: "Eggs", cat: "Dairy", keyword: "carton of eggs", seed: 19000 },
+                { name: "Milk", cat: "Dairy", keyword: "milk", seed: 11000 },
+                { name: "Bananas", cat: "Produce", keyword: "bananas", seed: 12000 },
+                { name: "Beef Steak", cat: "Meat", keyword: "beef steak", seed: 13000 },
+                { name: "Bread Loaf", cat: "Bakery", keyword: "bread loaf", seed: 14000 },
+                { name: "Cereal Box", cat: "Pantry", keyword: "cereal box", seed: 15000 },
+                { name: "Bottle Water", cat: "Beverages", keyword: "bottle water", seed: 16000 },
+                { name: "Shampoo", cat: "Personal Care", keyword: "shampoo", seed: 17000 },
+                { name: "Eggs", cat: "Dairy", keyword: "eggs", seed: 19000 },
             ];
 
             for (let i = 0; i < groceryCount; i++) {
